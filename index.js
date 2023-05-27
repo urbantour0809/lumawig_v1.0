@@ -1,2 +1,2 @@
 import { chrome } from 'webextension-polyfill';
-import './src/contenscript.js';
+import './src/contenscript.mjs';
