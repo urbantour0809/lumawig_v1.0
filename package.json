@@ -36,5 +36,9 @@
     "webpack-manifest-plugin": "^5.0.0"
   },
   "keywords": [],
-  "devDependencies": {}
+  "devDependencies": {
+    "css-loader": "^6.7.4",
+    "html-webpack-plugin": "^5.5.1",
+    "style-loader": "^3.3.3"
+  }
 }

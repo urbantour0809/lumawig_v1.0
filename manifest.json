@@ -8,10 +8,29 @@
       "48": "image/lumawig-48.png",
       "128": "image/lumawig-128.png"
     },
+    "permissions": [
+      "storage",
+      "scripting",
+      "tabs",
+      "activeTab",
+      "https://*.googleusercontent.com/",
+      "<all_urls>"
+    ],
+    
     "action": {
       "default_popup": "src/popup.html",
       "default_icon": "src/image/favicon.png"
-    }
+    },
+    "background": {
+      "service_worker": "src/background.mjs",
+      "type": "module"
+    },
+    "content_scripts": [
+      {
+        "js": ["dist/bundle.js"],
+        "run_at": "document_idle"
+      }
+    ]
    
 }
 
