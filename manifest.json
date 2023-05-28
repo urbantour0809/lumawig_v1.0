@@ -1,37 +1,34 @@
 {
-    "manifest_version": 3,
-    "name": "lumawig",
-    "description": "Word Enhancement Program for Filipino Language",
-    "version": "0.0.1",
-    "icons": {
-      "16": "image/lumawig-16.png",
-      "48": "image/lumawig-48.png",
-      "128": "image/lumawig-128.png"
-    },
-    "permissions": [
-      "storage",
-      "scripting",
-      "tabs",
-      "activeTab",
-      "https://*.googleusercontent.com/",
-      "<all_urls>"
-    ],
-    
-    "action": {
-      "default_popup": "src/popup.html",
-      "default_icon": "src/image/favicon.png"
-    },
-    "background": {
-      "service_worker": "src/background.mjs",
-      "type": "module"
-    },
-    "content_scripts": [
-      {
-        "js": ["dist/bundle.js"],
-        "run_at": "document_idle"
-      }
-    ]
-   
-}
-
+  "manifest_version": 3,
+  "name": "lumawig",
+  "description": "Word Enhancement Program for Filipino Language",
+  "version": "0.0.1",
+  "icons": {
+    "16": "src/image/lumawig-16.png",
+    "48": "src/image/lumawig-48.png",
+    "128": "src/image/lumawig-128.png"
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs",
+    "activeTab"
+  ],
   
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": "src/image/favicon.png"
+  },
+  "background": {
+    "service_worker": "src/background.mjs",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/bundle.js"],
+      "run_at": "document_idle"
+    }
+  ]
+ 
+}

@@ -1,2 +1,2 @@
-import { chrome } from 'webextension-polyfill';
+import browser from "webextension-polyfill";
 import './src/contentscript.mjs';
