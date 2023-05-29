@@ -1,30 +1,29 @@
-const browser = chrome;
+import {chrome} from "webextension-polyfill";
 
-function injectContentScriptOnCurrentTab() {
+async function injectContentScriptOnCurrentTab() {
   try {
-    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      const tab = tabs[0];
-      if (tab && !tab.url.startsWith("chrome://")) {
-        browser.scripting.executeScript({
+    const resultTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = resultTabs[0];
+    if (tab && !tab.url.startsWith("chrome://")) {
+      try {
+        await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           files: ["./dist/bundle.js"],
-        }).catch((error) => {
-          console.error("Error when injecting content script:", error);
         });
+      } catch (error) {
+        console.error("Error when injecting content script:", error);
       }
-    }).catch((error) => {
-      console.error("Error when querying tabs:", error);
-    });
+    }
   } catch (error) {
-    console.error("Error when injecting content script:", error);
+    console.error("Error when querying tabs:", error);
   }
 }
 
-browser.tabs.onActivated.addListener(({ tabId }) => {
+chrome.tabs.onActivated.addListener(({ tabId }) => {
   injectContentScriptOnCurrentTab();
 });
 
-browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status === "complete") {
     injectContentScriptOnCurrentTab();
   }

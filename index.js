@@ -1,2 +1,4 @@
-import browser from "webextension-polyfill";
+// index.js 파일
+
 import './src/contentscript.mjs';
+

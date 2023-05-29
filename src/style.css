@@ -1,6 +1,5 @@
 .focused::after {
-    content: url('image/circle_icon.png');
-    position: absolute;
-    margin-left: 5px;
-  }
-  
+  content: url('../dist/ac15484f02fcf740fdad.png');
+  position: absolute;
+  margin-left: 5px;
+}

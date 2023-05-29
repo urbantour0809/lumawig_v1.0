@@ -1,7 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
 import "../src/style.css";
+import chrome from "webextension-polyfill";
 
-let nextWordPredictionActive = false;
+console.log("Contentscript loaded");
 
 const predictNextWord = async (model, tokenizer, seedText) => {
   const sequence = tokenizer.texts_to_sequences([seedText]);
@@ -14,6 +15,8 @@ const predictNextWord = async (model, tokenizer, seedText) => {
 };
 
 const showIcon = () => {
+  console.log("Show icon");
+
   const textField = document.activeElement;
   if (textField.tagName === "INPUT" || textField.tagName === "TEXTAREA") {
     textField.classList.add("focused");
@@ -21,31 +24,57 @@ const showIcon = () => {
 };
 
 const hideIcon = () => {
+  console.log("Hide icon");
+
   const textField = document.activeElement;
   textField.classList.remove("focused");
 };
 
+function listenerCallback(request, sender, sendResponse) {
+  // 아직 구현되지 않음
+}
+
+const isRuntimeAvailable =
+  typeof chrome !== "undefined" && typeof chrome.runtime !== "undefined";
+
 async function main() {
-  // 기존 main() 함수 내용을 지움
+  const response = await chrome.runtime.sendMessage({ type: "GET_NEXT_WORD_PREDICTION_STATUS" });
+
+  if (response) {
+    const nextWordPredictionActive = response.payload;
+
+    if (nextWordPredictionActive) {
+      enableNextWordPrediction();
+    }
+  } else {
+    console.error(
+      "Both chrome.runtime and chrome objects are undefined. Falling back to default behavior."
+    );
+    enableNextWordPrediction();
+  }
 }
 
 main();
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === "TOGGLE_CONTENT_SCRIPT") {
-    nextWordPredictionActive = request.payload;
+if (isRuntimeAvailable) {
+  chrome.runtime.onMessage.addListener(listenerCallback);
+} else {
+  console.error("Both chrome.runtime and chrome objects are undefined");
+  enableNextWordPrediction();
+}
 
-    if (nextWordPredictionActive) {
-      enableNextWordPrediction();
-    } else {
-      disableNextWordPrediction();
-    }
-  }
-});
+async function performPrediction(textField, model, tokenizer) {
+  const seedText = textField.value;
+  console.log("User input:", seedText);
+  const predictedWord = await predictNextWord(model, tokenizer, seedText);
+  console.log("Predicted word:", predictedWord);
+}
 
 async function enableNextWordPrediction() {
+  console.log("Enabling next word prediction");
+
   const [{ default: loadModel }, { default: loadTokenizer }] = await Promise.all([
-    import("./loadmodel.mjs"),
+    import("./loadModel.mjs"),
     import("./loadTokenizer.mjs"),
   ]);
 
@@ -53,39 +82,25 @@ async function enableNextWordPrediction() {
   const tokenizer = await loadTokenizer("model/token.json");
   const textFields = document.querySelectorAll("input:text, textarea");
 
-  // Focus event handling
   textFields.forEach((textField) => {
     textField.addEventListener("focus", showIcon);
     textField.addEventListener("blur", hideIcon);
   });
 
-  // Prediction on text input
   textFields.forEach((textField) => {
     textField.addEventListener("input", async (event) => {
-      const seedText = event.target.value;
-      const predictedWord = await predictNextWord(model, tokenizer, seedText);
-      console.log(predictedWord);
+      await performPrediction(textField, model, tokenizer);
     });
   });
 
-  // Prediction when CTRL+Q is pressed
   document.addEventListener("keydown", async (event) => {
     if (event.ctrlKey && event.key === "q") {
       textFields.forEach(async (textField) => {
+        await performPrediction(textField, model, tokenizer);
         const seedText = textField.value;
         const predictedWord = await predictNextWord(model, tokenizer, seedText);
         textField.value = textField.value + " " + predictedWord;
       });
     }
   });
-}
-
-function disableNextWordPrediction() {
-  const textFields = document.querySelectorAll("input:text, textarea");
-  textFields.forEach((textField) => {
-    textField.removeEventListener("focus", showIcon);
-    textField.removeEventListener("blur", hideIcon);
-    textField.removeEventListener("input");
-  });
-  document.removeEventListener("keydown");
 }

@@ -6,6 +6,7 @@ module.exports = {
   mode: "production",
   entry: path.resolve(__dirname, "index.js"),
   output: {
+    publicPath: "dist/bundle.js",
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
@@ -48,7 +49,7 @@ module.exports = {
     },
   },
   externals: {
-    "webextension-polyfill": "browser", // 변경된 부분
+    "webextension-polyfill": "chrome", // 변경된 부분
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -63,6 +64,12 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/test_rsa_pubkey\.pem$/,
       contextRegExp: /public-encrypt/,
+    }),
+    // 아래에 DefinePlugin 추가
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_DEBUG: JSON.stringify(process.env.NODE_DEBUG),
+      },
     }),
   ],
 };
